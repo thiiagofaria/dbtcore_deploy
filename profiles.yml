@@ -1,0 +1,13 @@
+northwind:
+  target: prod
+  outputs:
+    prod:
+      type: postgres
+      host: northwind.cvoemmws62u8.us-east-2.rds.amazonaws.com
+      user: postgres
+      password: postgres
+      port: 5432
+      dbname: northwind
+      schema: public
+      threads: 1
+      keepalives_idle: 0
