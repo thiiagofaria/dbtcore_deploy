@@ -1,64 +1,63 @@
-version: 2  # Versão do esquema de metadados
+version: 2
 
 models:
-  - name: stg_orders  # Nome do modelo
-    description: "Tabela de pedidos do estágio"  # Descrição do modelo
+  - name: stg_orders
+    description: "Tabela de pedidos do estágio"
     columns:
-      - name: order_id  # Nome da coluna
-        description: "ID único do pedido"  # Descrição da coluna
+      - name: order_id
+        description: "ID único do pedido"
         tests:
-          - not_null  # Teste para garantir que a coluna não tenha valores nulos
-          - unique  # Teste para garantir que os valores na coluna sejam únicos
-      - name: customer_id  # Nome da coluna
-        description: "ID do cliente que fez o pedido"  # Descrição da coluna
+          - not_null
+          - unique
+      - name: customer_id
+        description: "ID do cliente que fez o pedido"
         tests:
-          - not_null  # Teste para garantir que a coluna não tenha valores nulos
-          - relationships:  # Teste para garantir a integridade referencial
-              to: ref('stg_customers')  # Referência ao modelo relacionado
-              field: customer_id  # Campo da coluna relacionada
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
 
-  - name: stg_order_details  # Nome do modelo
-    description: "Tabela de detalhes dos pedidos"  # Descrição do modelo
+  - name: stg_order_details
+    description: "Tabela de detalhes dos pedidos"
     columns:
-      - name: order_id  # Nome da coluna
-        description: "ID do pedido"  # Descrição da coluna
+      - name: order_id
+        description: "ID do pedido"
         tests:
-          - not_null  # Teste para garantir que a coluna não tenha valores nulos
-      - name: product_id  # Nome da coluna
-        description: "ID do produto"  # Descrição da coluna
+          - not_null
+      - name: product_id
+        description: "ID do produto"
         tests:
-          - not_null  # Teste para garantir que a coluna não tenha valores nulos
-      - name: unit_price  # Nome da coluna
-        description: "Preço unitário"  # Descrição da coluna
+          - not_null
+      - name: unit_price
+        description: "Preço unitário"
         tests:
-          - not_null  # Teste para garantir que a coluna não tenha valores nulos
-      - name: quantity  # Nome da coluna
-        description: "Quantidade"  # Descrição da coluna
+          - not_null
+      - name: quantity
+        description: "Quantidade"
         tests:
-          - not_null  # Teste para garantir que a coluna não tenha valores nulos
+          - not_null
 
-  - name: stg_customers  # Nome do modelo
-    description: "View de clientes em stg"  # Descrição do modelo
-    tags: ['untagged']  # Etiquetas para categorizar o modelo
-    meta:  # Metadados adicionais
-      owner: postgres  # Proprietário do modelo
-      type: view  # Tipo do modelo (tabela ou view)
-      package: northwind  # Pacote ao qual o modelo pertence
-      qualquer_coisa: teste  # Pacote ao qual o modelo pertence
-      language: sql  # Linguagem usada para definir o modelo
-      relation: postgres.public.raw_customers  # Relação específica no banco de dados
-      access: protected  # Nível de acesso ao modelo
-      version: '1.0'  # Versão do modelo
-      contract: Enforced  # Especifica que o contrato de schema é aplicado
+  - name: stg_customers
+    description: "View de clientes em stg"
+    tags: ['untagged']
+    meta:
+      owner: postgres
+      type: view
+      package: northwind
+      language: sql
+      relation: postgres.public.raw_customers
+      access: protected
+      version: '1.0'
+      contract: Enforced
     columns:
-      - name: customer_id  # Nome da coluna
-        description: "ID único do cliente"  # Descrição da coluna
-        type: integer  # Tipo de dado esperado para a coluna
+      - name: customer_id
+        description: "ID único do cliente"
+        type: integer
         tests:
-          - not_null  # Teste para garantir que a coluna não tenha valores nulos
-          - unique  # Teste para garantir que os valores na coluna sejam únicos
-      - name: company_name  # Nome da coluna
-        description: "Nome da empresa"  # Descrição da coluna
-        data_type: varchar  # Tipo de dado esperado para a coluna
+          - not_null
+          - unique
+      - name: company_name
+        description: "Nome da empresa"
+        type: varchar
         tests:
-          - not_null  # Teste para garantir que a coluna não tenha valores nulos
+          - not_null
