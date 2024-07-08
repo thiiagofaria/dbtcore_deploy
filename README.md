@@ -18,6 +18,12 @@ dbtcore_deploy/
 ├── logs/
 ├── northwind/
 │   ├── models/
+│   │   ├── staging/
+│   │   │   └── staging_northwind.sql
+│   │   ├── marts/
+│   │   │   ├── customers.sql
+│   │   │   ├── orders.sql
+│   │   │   └── products.sql
 │   ├── seeds/
 │   ├── snapshots/
 │   └── ...
@@ -81,15 +87,97 @@ Para executar os testes:
 dbt test
 ```
 
-## Estrutura dos Modelos
+## Arquitetura de Dados e Transformações
 
-Os modelos dbt estão localizados no diretório `northwind`. Este diretório pode conter subdiretórios como `models`, `seeds`, `snapshots`, entre outros, dependendo da organização do seu projeto.
+### Modelos de Staging
 
-### Exemplos de Modelos
+Os modelos de staging são usados para preparar os dados brutos para transformações subsequentes. Eles aplicam limpeza básica, formatação e junções necessárias.
 
-- **models/**: Contém os modelos SQL que transformam os dados.
-- **seeds/**: Contém dados estáticos que podem ser carregados no banco de dados.
-- **snapshots/**: Contém definições de snapshots para capturar o estado histórico dos dados.
+#### Exemplo: `staging_northwind.sql`
+
+```sql
+with raw_customers as (
+    select
+        customer_id,
+        company_name,
+        contact_name,
+        contact_title,
+        address,
+        city,
+        region,
+        postal_code,
+        country,
+        phone,
+        fax
+    from {{ source('northwind', 'customers') }}
+)
+
+select * from raw_customers
+```
+
+### Modelos de Marts
+
+Os modelos de marts são usados para criar tabelas analíticas específicas para diferentes áreas de negócios.
+
+#### `customers.sql`
+
+Modelo que agrega e transforma dados de clientes, calculando o número total de pedidos e o total gasto por cada cliente.
+
+```sql
+with customer_orders as (
+    select
+        c.customer_id,
+        c.company_name,
+        count(o.order_id) as total_orders,
+        sum(od.quantity * od.unit_price) as total_spent
+    from {{ ref('staging_northwind') }} c
+    left join {{ ref('staging_orders') }} o on c.customer_id = o.customer_id
+    left join {{ ref('staging_order_details') }} od on o.order_id = od.order_id
+    group by c.customer_id, c.company_name
+)
+
+select * from customer_orders
+```
+
+#### `orders.sql`
+
+Modelo que transforma dados de pedidos, incluindo informações sobre produtos pedidos e o valor total de cada pedido.
+
+```sql
+with order_details as (
+    select
+        o.order_id,
+        o.order_date,
+        o.customer_id,
+        od.product_id,
+        od.quantity,
+        od.unit_price,
+        (od.quantity * od.unit_price) as total_price
+    from {{ ref('staging_orders') }} o
+    left join {{ ref('staging_order_details') }} od on o.order_id = od.order_id
+)
+
+select * from order_details
+```
+
+#### `products.sql`
+
+Modelo que transforma dados de produtos, incluindo informações sobre o total vendido e o valor total das vendas.
+
+```sql
+with product_sales as (
+    select
+        p.product_id,
+        p.product_name,
+        sum(od.quantity) as total_quantity_sold,
+        sum(od.quantity * od.unit_price) as total_sales_value
+    from {{ ref('staging_products') }} p
+    left join {{ ref('staging_order_details') }} od on p.product_id = od.product_id
+    group by p.product_id, p.product_name
+)
+
+select * from product_sales
+```
 
 ## Contribuição
 
